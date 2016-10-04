@@ -1,18 +1,44 @@
+//******************************************************************************************************
+//  MeterEventsByLine.js - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may
+//  not use this file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  10/03/2016 - Billy Ernest
+//       Generated original version of source code.
+//
+//******************************************************************************************************
+
 
 
 var postedMeterId = "";
 var postedDate = "";
 var postedMeterName = "";
+var dataHub = null;
 
 
 $(document).ready(function () {
-
+    dataHub = $.connection.dataHub.server;
+    $.connection.hub.start().done(function () {
+        populateMeterEventsDivWithGrid('getSiteLinesDetailsByDate', "MeterDetailsByDate", postedMeterName, postedMeterId, postedDate);
+    });
 
     postedMeterId = $("#postedMeterId")[0].innerHTML;
     postedDate = $("#postedDate")[0].innerHTML;
     postedMeterName = $("#postedMeterName")[0].innerHTML;
 
-    populateMeterEventsDivWithGrid('getSiteLinesDetailsByDate', "MeterDetailsByDate", postedMeterName, postedMeterId, postedDate);
 
 });
 
@@ -50,14 +76,32 @@ function populateMeterEventsDivWithGrid(thedatasource, thediv, siteName, siteID,
                 scrollWidth: '100%',
                 columns: [
                     { field: 'theinceptiontime', headerText: 'Start Time', headerStyle: 'width: 30%', bodyStyle: 'width: 30%; height: 20px', sortable: true },
-                    { field: 'theeventtype', headerText: 'Event Type', headerStyle: 'width: 20%', bodyStyle: 'width: 20%; height: 20px', sortable: true },
+                    { field: 'theeventtype', headerText: 'Event Type', headerStyle: 'width: 20%', bodyStyle: 'width: 20%; height: 20px', sortable: true, content: function(row, line, element){
+                        var html = "<select id='select"+row.theeventid+"' class='form-control'>" +
+                                      "<option value='7' "+ (row.theeventtype === "Test"? "selected" : "")+ ">Test</option>" +
+                                    "</select>";
+                        dataHub.getEventTypeID(row.theeventid).done(function (eventType) {
+                            if (eventType.Name !== "Other")
+                                $('#select' + row.theeventid).prepend("<option value='6' " + (row.theeventtype === "Other" ? "selected" : "") + ">Other</option>");
+
+                            $('#select' + row.theeventid).prepend("<option value='" + eventType.ID + "' " + (row.theeventtype === eventType.Name ? "selected" : "") + ">" + eventType.Name + " (Original)</option>");
+                            $('#select' + row.theeventid).on('change', function (event) {
+                                dataHub.setEventTypeID(row.theeventid, $('#select' + row.theeventid).val())
+                            });
+
+
+                        });
+
+
+                        return html;
+
+                     }},
                     { field: 'thelinename', headerText: 'Line Name', headerStyle: 'width: 20%', bodyStyle: 'width:  20%; height: 20px', sortable: true },
                     { field: 'voltage', headerText: 'Line KV', headerStyle: 'width:  6%', bodyStyle: 'width:  6%; height: 20px', sortable: true },
                     { field: 'thefaulttype', headerText: 'Phase', headerStyle: 'width:  6%', bodyStyle: 'width:  6%; height: 20px', sortable: true },
                     { field: 'thecurrentdistance', headerText: 'Distance', headerStyle: 'width: 10%', bodyStyle: 'width: 10%; height: 20px', sortable: true },
                     {
                         headerText: '', headerStyle: 'width: 20%', content: function (row) {
-                            console.log(row);
                             var key = Object.keys(row).filter(function(a){
                                 return  a !== 'thecurrentdistance' &&
                                         a !== 'theeventid' &&

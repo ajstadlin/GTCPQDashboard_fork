@@ -54,6 +54,7 @@ var cache_Graph_Data = null;
 var cache_ErrorBar_data = null;
 var cache_Table_Data = null;
 var cache_Contour_Data = null;
+var cache_Sparkline_Data = null;
 var brush = null;
 var cache_Last_Date = null;
 var leafletMap = {'Overview-Today': null, 'Overview-Yesterday': null, Events: null, Disturbances: null, Trending: null, TrendingData: null, Faults: null, Breakers: null, Completeness: null, Correctness: null, ModbusData: null};
@@ -149,6 +150,8 @@ function loadDataForDate() {
         else {
             cache_Last_Date = null;
             cache_Table_Data = null;
+            cache_Sparkline_Data = null;
+
         }
 
         setMapHeaderDate(contextfromdate, contexttodate);
@@ -1114,6 +1117,8 @@ function buildBarChart(data, thediv, siteName, siteID, thedatefrom, thedateto) {
             .attr("transform", function (d, i) { return "translate(140," + i * 20 + ")"; });
 
         var disabledLegendFields = [];
+        if(currentTab === "Events")
+            cache_Graph_Data[0]['OtherDisabled'] = true;
 
         legend.append("rect")
             .attr("x", width + -65)
@@ -1137,7 +1142,7 @@ function buildBarChart(data, thediv, siteName, siteID, thedatefrom, thedateto) {
                     disabledLegendFields = disabledLegendFields.filter(function (word) { return word !== d });
                 }
 
-                toggleSeries(d, chartData, $(this).css('fill') === 'rgb(128, 128, 128)');
+                toggleSeries(d, $(this).css('fill') === 'rgb(128, 128, 128)');
                 window["populate" + currentTab + "DivWithGrid"](cache_Table_Data, disabledLegendFields);
 
                 if ($('#mapGrid')[0].value == "Map" && (currentTab === 'Disturbances' || currentTab === 'Events' || currentTab ==='Trending')) {
@@ -1155,6 +1160,8 @@ function buildBarChart(data, thediv, siteName, siteID, thedatefrom, thedateto) {
             .style("text-anchor", "start")
             .text(function (d) { return d; });
 
+        if(currentTab === "Events")
+         toggleSeries("Other", true);
     }
 
     //called when selection is chosen on overview map
@@ -1189,7 +1196,7 @@ function buildBarChart(data, thediv, siteName, siteID, thedatefrom, thedateto) {
     }
 
     //Toggles a certain series.
-    function toggleSeries(seriesName, data, isDisabling) {
+    function toggleSeries(seriesName, isDisabling) {
 
         var newData = deepCopy(cache_Graph_Data);
 
@@ -1964,7 +1971,6 @@ function populateGridSparklineCorrectness(data, siteID, siteName, makespark) {
     colorMap = globalcolorsDQ;
 
     var matrixItemID = "#" + "matrix_" + siteID + "_box_" + currentTab;
-
     $(matrixItemID).append($("<div unselectable='on' class='sparkbox' id='" + "sparkbox_" + siteID + "_box_" + currentTab + "'/>"));
 
     if (data[0] == 0) {
@@ -1987,8 +1993,8 @@ function populateGridSparklineCorrectness(data, siteID, siteName, makespark) {
 
         $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
             type: 'bar',
-            height: '10px',
-            barWidth: '3px',
+            height: parseInt($(matrixItemID).height() * .4),
+            barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
             siteid: siteName,
             //datadate: thedate,
             borderWidth: 0,
@@ -2060,8 +2066,8 @@ function populateGridSparklineCompleteness(data, siteID, siteName, makespark) {
     //var sparklinedraw = function (height, barWidth) {
         $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
             type: 'bar',
-            height: '10px',
-            barWidth: '3px',
+            height: parseInt($(matrixItemID).height() * .4),
+            barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
             siteid: siteName,
             //datadate: thedate,
             borderWidth: 0,
@@ -2130,12 +2136,12 @@ function populateGridSparklineEvents(data, siteID, siteName) {
             var thetitle = "";
             thetitle += "<table>";
             thetitle += "<tr><td colspan=2 align='center'>" + siteName + "</td></tr>";
-            thetitle += "<tr><td>Interruptions</td><td align='right'>" + data[0] + "</td></tr>";
-            thetitle += "<tr><td>Faults</td><td align='right'>" + data[1] + "</td></tr>";
-            thetitle += "<tr><td>Sags</td><td align='right'>" + data[2] + "</td></tr>";
-            thetitle += "<tr><td>Transients</td><td align='right'>" + data[3] + "</td></tr>";
-            thetitle += "<tr><td>Swells</td><td align='right'>" + data[4] + "</td></tr>";
-            thetitle += "<tr><td>Others</td><td align='right'>" + data[5] + "</td></tr>";
+            thetitle += "<tr><td>Interruptions</td><td align='right'>" + data[5] + "</td></tr>";
+            thetitle += "<tr><td>Faults</td><td align='right'>" + data[4] + "</td></tr>";
+            thetitle += "<tr><td>Sags</td><td align='right'>" + data[3] + "</td></tr>";
+            thetitle += "<tr><td>Transients</td><td align='right'>" + data[2] + "</td></tr>";
+            thetitle += "<tr><td>Swells</td><td align='right'>" + data[1] + "</td></tr>";
+            thetitle += "<tr><td>Others</td><td align='right'>" + data[0] + "</td></tr>";
             thetitle += "</table>";
             return (thetitle);
         }
@@ -2147,15 +2153,15 @@ function populateGridSparklineEvents(data, siteID, siteName) {
     //var sparklinedraw = function (height, barWidth) {
         $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
             type: 'bar',
-            height: '10px',
-            barWidth: '3px',
+            height: parseInt($(matrixItemID).height() * .4),
+            barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
             siteid: siteName,
             //datadate: thedate,
             borderWidth: 0,
             nullColor: '#f5f5f5',
             zeroColor: '#f5f5f5',
             borderColor: '#f5f5f5',
-            colorMap: globalcolorsEvents,
+            colorMap: [globalcolorsEvents[5], globalcolorsEvents[4], globalcolorsEvents[3], globalcolorsEvents[2], globalcolorsEvents[1], globalcolorsEvents[0]],
 
             tooltipFormatter: function (sp, options, fields) {
                 var returnvalue = '<div unselectable="on" class="jqsheader">' + options.userOptions.siteid + '</div>';// + ' ' + options.userOptions.datadate
@@ -2246,8 +2252,8 @@ function populateGridSparklineDisturbances(data, siteID, siteName) {
 
         $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
             type: 'bar',
-            height: '10px',
-            barWidth: '3px',
+            height: parseInt($(matrixItemID).height() * .4),
+            barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
             siteid: siteName,
             //datadate: thedate,
             borderWidth: 0,
@@ -2306,7 +2312,7 @@ function populateGridSparklineBreakers(data, siteID, siteName) {
 
     var colorMap = [];
 
-    sparkvalues = [data[0], data[1], data[2]];
+    sparkvalues = [data[2], data[1], data[0]];
 
     colorMap = globalcolors; //['#FF0000', '#CC6600', '#FF8800'];
 
@@ -2320,8 +2326,8 @@ function populateGridSparklineBreakers(data, siteID, siteName) {
 
         $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
             type: 'bar',
-            height: '10px',
-            barWidth: '3px',
+            height: parseInt($(matrixItemID).height() * .4),
+            barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
             siteid: siteName,
             //datadate: thedate,
             borderWidth: 0,
@@ -2691,11 +2697,12 @@ function plotGridLocations(locationdata, newTab, thedatefrom, thedateto) {
     });
 
     /// Set Matrix Cell size
+    cache_Sparkline_Data = locationdata.d.Locations;
     resizeMatrixCells(newTab);
 
-    $.each(locationdata.d.Locations, (function (key, value) {
-        populateGridMatrix(value.data, value.id, value.name);
-    }));
+    //$.each(locationdata.d.Locations, (function (key, value) {
+    //    populateGridMatrix(value.data, value.id, value.name);
+    //}));
 
     showSiteSet($("#selectSiteSet" + currentTab)[0]);
 };
@@ -3399,6 +3406,12 @@ function resizeMatrixCells(newTab) {
         $.event.trigger({ type: 'matrixResize', message: 'Matrix Resize', time: new Date() });
 
     }
+    if (cache_Sparkline_Data !== null) {
+        $.each(cache_Sparkline_Data, (function (key, value) {
+            populateGridMatrix(value.data, value.id, value.name);
+        }));
+    }
+
 
 }
 
@@ -4096,6 +4109,7 @@ function buildPage() {
             else {
                 cache_Graph_Data = null;
                 cache_Errorbar_Data = null;
+                cache_Sparkline_Data = null;
                 var mapormatrix = $("#mapGrid")[0].value;
                 $('#headerStrip').show();
                 manageTabsByDate(newTab, contextfromdate, contexttodate);
@@ -4135,7 +4149,7 @@ function buildPage() {
     else {
         cache_Graph_Data = null;
         cache_Errorbar_Data = null;
-
+        cache_Sparkline_Data = null;
         $('#headerStrip').show();
         manageTabsByDate(currentTab, contextfromdate, contexttodate);
 

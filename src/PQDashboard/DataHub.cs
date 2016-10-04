@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -44,6 +45,7 @@ namespace PQDashboard
 
         // Fields
         private readonly DataContext m_coreContext;
+        private readonly DataContext m_dbContext;
         private bool m_disposed;
         private readonly DataSubscriptionOperations m_dataSubscriptionOperations;
 
@@ -55,6 +57,7 @@ namespace PQDashboard
         public DataHub()
         {
             m_coreContext = new DataContext("securityProvider",exceptionHandler: MvcApplication.LogException);
+            m_dbContext = new DataContext("systemSettings", exceptionHandler: MvcApplication.LogException);
             m_dataSubscriptionOperations = new DataSubscriptionOperations(this, MvcApplication.LogStatusMessage, MvcApplication.LogException);
 
         }
@@ -85,6 +88,7 @@ namespace PQDashboard
                     if (disposing)
                     {
                         m_coreContext?.Dispose();
+                        m_dbContext?.Dispose();
                     }
                 }
                 finally
@@ -428,6 +432,31 @@ namespace PQDashboard
 
         #endregion
 
+        #region [EventOveride]
+        public EventType GetEventTypeID(int eventID)
+        {
+            int eventTypeID = m_dbContext.Connection.ExecuteScalar<int>("Select EventTypeID FROM Event WHERE ID = {0}", eventID);
+            return m_dbContext.Table<EventType>().QueryRecords(restriction: new RecordRestriction("ID = {0}", eventTypeID)).First();
+        }
+
+        public void SetEventTypeID(int eventID, int eventTypeID)
+        {
+            int originalEventTypeID = m_dbContext.Connection.ExecuteScalar<int>("SELECT EventTypeID FROM Event WHERE ID = {0}", eventID);
+            int index = m_dbContext.Connection.ExecuteScalar<int>("SELECT ID FROM EventOveride WHERE EventID = {0}", eventID);
+            if(index > 0)
+                m_dbContext.Table<EventOveride>().DeleteRecord(index);
+
+            EventOveride eo = new EventOveride();
+            eo.EventID = eventID;
+            eo.EventTypeID = eventTypeID;
+
+            if ((eventTypeID == 6 && originalEventTypeID != 6) || eventTypeID == 7)
+            {
+                m_dbContext.Table<EventOveride>().AddNewRecord(eo);
+            }
+
+        }
+        #endregion
 
         #region [ Misc Hub Operations ]
 

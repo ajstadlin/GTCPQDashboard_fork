@@ -311,7 +311,7 @@ public class eventService : System.Web.Services.WebService {
             }
             rdr.Dispose();
 
-            cmd = new SqlCommand("dbo.selectSiteLinesDetailsByDate", conn);
+            cmd = new SqlCommand("dbo.gtcSelectSiteLinesDetailsByDate", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.Add(new SqlParameter("@EventDate", targetDate));
             cmd.Parameters.Add(new SqlParameter("@MeterID", siteID));
