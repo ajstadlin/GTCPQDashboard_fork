@@ -1741,7 +1741,7 @@ function getStatusColorForGridElement( data ) {
             if (percentage > 0 && !disabledList[currentTab][">0% - 49%"])
                 return (globalcolorsDQ[1]);
             if (!disabledList[currentTab]["0%"]) return (globalcolorsDQ[0]);
-            return ("#CCCCCC");
+            return (globalcolorsDQ[0]);
             break;
 
         case "Correctness":
@@ -1770,7 +1770,7 @@ function getStatusColorForGridElement( data ) {
             if (percentage > 0 && !disabledList[currentTab][">0% - 49%"])
                 return (globalcolorsDQ[1]);
             if (!disabledList[currentTab]["0%"]) return (globalcolorsDQ[0]);
-            return ("#CCCCCC");
+            return (globalcolorsDQ[0]);
             break;
 
         case "Trending":
@@ -2113,7 +2113,13 @@ function populateGridSparklineCompleteness(data, siteID, siteName, makespark) {
 
 function populateGridSparklineEvents(data, siteID, siteName) {
 
-    var sparkvalues = [data[0], data[1], data[2], data[3], data[4], data[5]];
+    var sparkValues = { "Interruption": { data: data[0], color: globalcolorsEvents[5] }, "Fault": { data: data[1], color: globalcolorsEvents[4] }, "Sag": { data: data[2], color: globalcolorsEvents[3] }, "Transient": { data: data[3], color: globalcolorsEvents[2] }, "Swell": { data: data[4], color: globalcolorsEvents[1] }, "Other": { data: data[5], color: globalcolorsEvents[0] } };
+    var numbers = [];
+    var colors = [];
+    $.each($.map(disabledList[currentTab], function (data, key) { if (!data) return key }), function (index, field) {
+        numbers.push(sparkValues[field].data);
+        colors.push(sparkValues[field].color);
+    });
 
     var matrixItemID = "#" + "matrix_" + siteID + "_box_" + currentTab;
 
@@ -2152,7 +2158,7 @@ function populateGridSparklineEvents(data, siteID, siteName) {
 
     //$(matrixItemID)[0].title = siteName + "\nInterruptions: " + data[0] + "\nFaults: " + data[1] + "\nSags: " + data[2] + "\nTransients: " + data[3] + "\nSwells: " + data[4] + "\nOthers: " + data[5];
     //var sparklinedraw = function (height, barWidth) {
-        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
+        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(numbers, {
             type: 'bar',
             height: parseInt($(matrixItemID).height() * .4),
             barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
@@ -2162,7 +2168,7 @@ function populateGridSparklineEvents(data, siteID, siteName) {
             nullColor: '#f5f5f5',
             zeroColor: '#f5f5f5',
             borderColor: '#f5f5f5',
-            colorMap: [globalcolorsEvents[5], globalcolorsEvents[4], globalcolorsEvents[3], globalcolorsEvents[2], globalcolorsEvents[1], globalcolorsEvents[0]],
+            colorMap: colors,
 
             tooltipFormatter: function (sp, options, fields) {
                 var returnvalue = '<div unselectable="on" class="jqsheader">' + options.userOptions.siteid + '</div>';// + ' ' + options.userOptions.datadate
@@ -2210,7 +2216,14 @@ function populateGridSparklineEvents(data, siteID, siteName) {
 
 function populateGridSparklineDisturbances(data, siteID, siteName) {
 
-    var sparkvalues = [data[0], data[1], data[2], data[3], data[4], data[5]];
+    //var sparkvalues = [data[0], data[1], data[2], data[3], data[4], data[5]];
+    var sparkValues = { "5": { data: data[5], color: globalcolorsEvents[5] }, "4": { data: data[4], color: globalcolorsEvents[4] }, "3": { data: data[3], color: globalcolorsEvents[3] }, "2": { data: data[2], color: globalcolorsEvents[2] }, "1": { data: data[1], color: globalcolorsEvents[1] }, "0": { data: data[0], color: globalcolorsEvents[0] } };
+    var numbers = [];
+    var colors = [];
+    $.each($.map(disabledList[currentTab], function (data, key) { if (!data) return key }).sort(function (a, b) { return b - a;}), function (index, field) {
+        numbers.push(sparkValues[field].data);
+        colors.push(sparkValues[field].color);
+    });
 
     var matrixItemID = "#" + "matrix_" + siteID + "_box_" + currentTab;
 
@@ -2251,7 +2264,7 @@ function populateGridSparklineDisturbances(data, siteID, siteName) {
 
     //var sparklinedraw = function (height, barWidth) {
 
-        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
+        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(numbers, {
             type: 'bar',
             height: parseInt($(matrixItemID).height() * .4),
             barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
@@ -2261,7 +2274,7 @@ function populateGridSparklineDisturbances(data, siteID, siteName) {
             nullColor: '#f5f5f5',
             zeroColor: '#f5f5f5',
             borderColor: '#f5f5f5',
-            colorMap: globalcolorsEvents,
+            colorMap: colors,
 
             tooltipFormatter: function (sp, options, fields) {
                 var returnvalue = '<div unselectable="on" class="jqsheader">' + options.userOptions.siteid + '</div>';// + ' ' + options.userOptions.datadate
@@ -2317,6 +2330,16 @@ function populateGridSparklineBreakers(data, siteID, siteName) {
 
     colorMap = globalcolors; //['#FF0000', '#CC6600', '#FF8800'];
 
+    var sparkValues = { "Indeterminate": { data: data[2], color: globalcolors[0] }, "Late": { data: data[1], color: globalcolors[1] }, "Normal": { data: data[2], color: globalcolors[2] } };
+    var numbers = [];
+    var colors = [];
+    $.each($.map(disabledList[currentTab], function (data, key) { if (!data) return key }).sort(function (a, b) { return b - a; }), function (index, field) {
+        numbers.push(sparkValues[field].data);
+        colors.push(sparkValues[field].color);
+    });
+
+
+
     var matrixItemID = "#" + "matrix_" + siteID + "_box_" + currentTab;
 
     $(matrixItemID).append($("<div unselectable='on' class='sparkbox' id='" + "sparkbox_" + siteID + "_box_" + currentTab + "'/>"));
@@ -2325,7 +2348,7 @@ function populateGridSparklineBreakers(data, siteID, siteName) {
 
     //var sparklinedraw = function (height, barWidth) {
 
-        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(sparkvalues, {
+        $("#sparkbox_" + siteID + "_box_" + currentTab).sparkline(numbers, {
             type: 'bar',
             height: parseInt($(matrixItemID).height() * .4),
             barWidth: parseInt($(matrixItemID).width() / (data.length * 2)),
@@ -2335,7 +2358,7 @@ function populateGridSparklineBreakers(data, siteID, siteName) {
             nullColor: '#f5f5f5',
             zeroColor: '#f5f5f5',
             borderColor: '#f5f5f5',
-            colorMap: colorMap,
+            colorMap: colors,
 
             tooltipFormatter: function (sp, options, fields) {
                 var returnvalue = '<div unselectable="on" class="jqsheader">' + options.userOptions.siteid + '</div>';// + ' ' + options.userOptions.datadate
