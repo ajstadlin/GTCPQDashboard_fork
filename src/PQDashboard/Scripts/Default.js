@@ -1557,7 +1557,7 @@ function getEventsHeatmapCounts(currentTab, datefrom, dateto, severities) {
         dataType: 'json',
         cache: true,
         success: function (data) {
-            var map = getMapInstance(currentTab);
+            //var map = getMapInstance(currentTab);
             LoadHeatmapLeaflet(data.d);
 
         },

@@ -528,7 +528,7 @@ public class eventService : System.Web.Services.WebService {
         {
             conn = new SqlConnection(connectionstring);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("dbo.selectEventsForMeterIDByDateRange", conn);
+            SqlCommand cmd = new SqlCommand("dbo.gtcSelectEventsForMeterIDByDateRange", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.Add(new SqlParameter("@EventDateFrom", thedatefrom));
             cmd.Parameters.Add(new SqlParameter("@EventDateTo", thedateto));
@@ -1564,7 +1564,7 @@ public class eventService : System.Web.Services.WebService {
         {
             conn = new SqlConnection(connectionstring);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("dbo.selectSitesEventsDetailsByDate", conn);
+            SqlCommand cmd = new SqlCommand("dbo.gtcSelectSitesEventsDetailsByDate", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.Add(new SqlParameter("@EventDate", targetDate));
             cmd.Parameters.Add(new SqlParameter("@MeterID", siteID));

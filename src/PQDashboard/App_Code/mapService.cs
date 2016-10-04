@@ -444,7 +444,7 @@ public class mapService : WebService
         {
             conn = new SqlConnection(connectionstring);
             conn.Open();
-            SqlCommand cmd = new SqlCommand("dbo.selectMeterLocationsEvents", conn);
+            SqlCommand cmd = new SqlCommand("dbo.gtcSelectMeterLocationsEvents", conn);
             //SqlCommand cmd = new SqlCommand("dbo.selectMeterLocationsMinimumSags", conn);
 
             cmd.Parameters.Add(new SqlParameter("@EventDateFrom", targetDateFrom));
